@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 
 Describe 'Get-Fibonacci' {
     BeforeAll {
-        . (Join-Path $PSScriptRoot 'math-tool.ps1')
+        . (Join-Path $PSScriptRoot 'math-tool.ps1') -N 0
     }
 
     It 'returns 0 for N=0' {
@@ -28,6 +28,13 @@ Describe 'Get-Fibonacci' {
 }
 
 Describe 'math-tool CLI' {
+    BeforeAll {
+        $command = Get-Command pwsh -ErrorAction SilentlyContinue
+        if (-not $command) {
+            throw 'pwsh executable not found; isolated CLI tests require pwsh.'
+        }
+    }
+
     It 'writes one expected line for N=<n>' -TestCases @(
         @{ N = 0; Expected = 'Fibonacci(0) = 0' }
         @{ N = 1; Expected = 'Fibonacci(1) = 1' }
@@ -36,25 +43,30 @@ Describe 'math-tool CLI' {
         param($N, $Expected)
 
         $targetScriptPath = Join-Path $PSScriptRoot 'math-tool.ps1'
-        $processStartInfo = [System.Diagnostics.ProcessStartInfo]::new()
-        $processStartInfo.FileName = (Get-Command pwsh).Source
-        $processStartInfo.Arguments = "-NoLogo -NoProfile -File `"$targetScriptPath`" -N $N"
-        $processStartInfo.RedirectStandardOutput = $true
-        $processStartInfo.RedirectStandardError = $true
-        $processStartInfo.UseShellExecute = $false
+        $stdoutFile = New-TemporaryFile
+        $stderrFile = New-TemporaryFile
 
-        $process = [System.Diagnostics.Process]::Start($processStartInfo)
-        [void]$process.WaitForExit()
-        $stdout = $process.StandardOutput.ReadToEnd()
-        $stderr = $process.StandardError.ReadToEnd()
+        try {
+            $process = Start-Process `
+                -FilePath (Get-Command pwsh).Source `
+                -ArgumentList @('-NoLogo', '-NoProfile', '-File', $targetScriptPath, '-N', [string]$N) `
+                -RedirectStandardOutput $stdoutFile `
+                -RedirectStandardError $stderrFile `
+                -Wait `
+                -PassThru
+
+            $stdout = Get-Content -Path $stdoutFile -Raw
+            $stderr = Get-Content -Path $stderrFile -Raw
+        }
+        finally {
+            Remove-Item -LiteralPath $stdoutFile, $stderrFile -Force
+        }
 
         $stdoutLines = @($stdout -split "`r?`n" | Where-Object { $_ -ne '' })
 
         $process.ExitCode | Should -Be 0
-        $stderr | Should -Be ''
+        $stderr | Should -BeNullOrEmpty
         $stdoutLines | Should -HaveCount 1
         $stdoutLines[0] | Should -Be $Expected
-
-        $process.Dispose()
     }
 }
