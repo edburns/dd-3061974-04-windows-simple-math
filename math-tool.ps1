@@ -3,7 +3,10 @@ param(
     [Parameter(Mandatory)]
     # Fibonacci(92) is the largest sequence value representable by Int64.
     [ValidateRange(0, 92)]
-    [int]$N
+    [int]$N,
+
+    [ValidateSet('fibonacci', 'factorial')]
+    [string]$Operation = 'fibonacci'
 )
 
 if ($MyInvocation.InvocationName -ne '.') {
@@ -40,7 +43,32 @@ function Get-Fibonacci {
     return $current
 }
 
+function Get-Factorial {
+    [CmdletBinding()]
+    param(
+        [Parameter(Mandatory)]
+        [ValidateRange(0, 92)]
+        [int]$N
+    )
+
+    [long]$result = 1
+
+    for ($index = 2; $index -le $N; $index++) {
+        $result *= $index
+    }
+
+    return $result
+}
+
 if ($MyInvocation.InvocationName -ne '.') {
-    [long]$value = Get-Fibonacci -N $N
-    Write-Output ("Fibonacci({0}) = {1}" -f $N, $value)
+    switch ($Operation) {
+        'factorial' {
+            [long]$value = Get-Factorial -N $N
+            Write-Output ("Factorial({0}) = {1}" -f $N, $value)
+        }
+        default {
+            [long]$value = Get-Fibonacci -N $N
+            Write-Output ("Fibonacci({0}) = {1}" -f $N, $value)
+        }
+    }
 }
