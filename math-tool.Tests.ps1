@@ -18,6 +18,14 @@ Describe 'Get-Fibonacci' {
         Get-Fibonacci -N 5 | Should -Be 5
     }
 
+    It 'returns the largest Fibonacci value that fits in Int64' {
+        Get-Fibonacci -N 92 | Should -Be 7540113804746346429
+    }
+
+    It 'rejects an index that would overflow Int64' {
+        { Get-Fibonacci -N 93 } | Should -Throw
+    }
+
     It 'emits a single numeric value with no extra success-stream output' {
         $records = @(Get-Fibonacci -N 5)
 
@@ -52,14 +60,12 @@ Describe 'math-tool CLI' {
                 -Wait `
                 -PassThru
 
-            $stdout = Get-Content -Path $stdoutFile -Raw
+            $stdoutLines = @(Get-Content -Path $stdoutFile)
             $stderr = Get-Content -Path $stderrFile -Raw
         }
         finally {
             Remove-Item -LiteralPath $stdoutFile, $stderrFile -Force
         }
-
-        $stdoutLines = @($stdout -split "`r?`n" | Where-Object { $_ -ne '' })
 
         $process.ExitCode | Should -Be 0
         $stderr | Should -BeNullOrEmpty
