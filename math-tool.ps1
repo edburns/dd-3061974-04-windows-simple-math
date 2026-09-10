@@ -1,7 +1,7 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)]
-    # Fibonacci(92) is the largest sequence value representable by Int64.
+    # The selected operation applies its own Int64-safe upper bound.
     [ValidateRange(0, 92)]
     [int]$N,
 
@@ -47,7 +47,7 @@ function Get-Factorial {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
-        [ValidateRange(0, 92)]
+        [ValidateRange(0, 20)]
         [int]$N
     )
 

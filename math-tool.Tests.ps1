@@ -52,6 +52,14 @@ Describe 'Get-Factorial' {
         Get-Factorial -N 5 | Should -Be 120
     }
 
+    It 'returns the largest factorial value that fits in Int64' {
+        Get-Factorial -N 20 | Should -Be 2432902008176640000
+    }
+
+    It 'rejects an input that would overflow Int64' {
+        { Get-Factorial -N 21 } | Should -Throw
+    }
+
     It 'emits a single numeric value with no extra success-stream output' {
         $records = @(Get-Factorial -N 5)
 
