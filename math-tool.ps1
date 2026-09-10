@@ -1,17 +1,21 @@
 [CmdletBinding()]
 param(
     [Parameter(Mandatory)]
+    # Fibonacci(92) is the largest sequence value representable by Int64.
     [ValidateRange(0, 92)]
     [int]$N
 )
 
-Set-StrictMode -Version Latest
-$ErrorActionPreference = 'Stop'
+if ($MyInvocation.InvocationName -ne '.') {
+    Set-StrictMode -Version Latest
+    $ErrorActionPreference = 'Stop'
+}
 
 function Get-Fibonacci {
     [CmdletBinding()]
     param(
         [Parameter(Mandatory)]
+        # Fibonacci(92) is the largest sequence value representable by Int64.
         [ValidateRange(0, 92)]
         [int]$N
     )
