@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 
 Describe 'Get-Fibonacci' {
     BeforeAll {
-        . (Join-Path $PSScriptRoot 'math-tool.ps1') -N 0
+        . (Join-Path $PSScriptRoot 'math-tool.ps1')
     }
 
     It 'returns 0 for N=0' {
