@@ -3,7 +3,7 @@ $ErrorActionPreference = 'Stop'
 
 Describe 'Get-Fibonacci' {
     BeforeAll {
-        . (Join-Path $PSScriptRoot 'math-tool.ps1')
+        . (Join-Path $PSScriptRoot 'math-tool.ps1') -N 0
     }
 
     It 'returns 0 for N=0' {
@@ -29,10 +29,7 @@ Describe 'Get-Fibonacci' {
 
 Describe 'math-tool CLI' {
     BeforeAll {
-        $command = Get-Command pwsh -ErrorAction SilentlyContinue
-        if (-not $command) {
-            throw 'pwsh executable not found; isolated CLI tests require pwsh.'
-        }
+        $script:pwshPath = (Get-Command pwsh -ErrorAction Stop).Source
     }
 
     It 'writes one expected line for N=<n>' -TestCases @(
@@ -48,7 +45,7 @@ Describe 'math-tool CLI' {
 
         try {
             $process = Start-Process `
-                -FilePath (Get-Command pwsh).Source `
+                -FilePath $script:pwshPath `
                 -ArgumentList @('-NoLogo', '-NoProfile', '-File', $targetScriptPath, '-N', [string]$N) `
                 -RedirectStandardOutput $stdoutFile `
                 -RedirectStandardError $stderrFile `
