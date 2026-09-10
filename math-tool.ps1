@@ -36,7 +36,7 @@ function Get-Fibonacci {
     return $current
 }
 
-if ([string]::IsNullOrEmpty($MyInvocation.ScriptName)) {
+if ($MyInvocation.InvocationName -ne '.') {
     [long]$value = Get-Fibonacci -N $N
     Write-Output ("Fibonacci({0}) = {1}" -f $N, $value)
 }
